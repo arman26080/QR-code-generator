@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+</head>
+<body>
+    <h2>QR Code Generator</h2>
+    <form action="/generate_qr" method="POST">
+        <input type="text" name="qr_data" placeholder="Enter text for QR code" required>
+        <button type="submit">Generate QR</button>
+    </form>
+    <h3>Generated QR Code:</h3>
+    <img id="qrImage" src="" alt="Your QR Code will appear here">
+    <script>
+        document.querySelector("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            fetch("/generate_qr", { method: "POST", body: formData })
+                .then(response => response.blob())
+                .then(blob => {
+                    document.getElementById("qrImage").src = URL.createObjectURL(blob);
+                });
+        });
+    </script>
+</body>
+</html>
