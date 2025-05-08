@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator - Modern</title>
-    <!-- Google Fonts Link -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Link to the stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -23,6 +21,8 @@
                 <img id="qrImage" src="" alt="Your QR Code will appear here">
                 <p id="qrMessage">Enter data and click "Generate QR" to see your code.</p>
              </div>
+             <!-- New Download Button -->
+             <button id="downloadQRButton" class="download-button" style="display: none;">Download QR Code</button>
         </div>
     </div>
 
@@ -33,22 +33,43 @@
             const qrMessage = document.getElementById("qrMessage");
             const qrImagePlaceholder = document.getElementById("qrImagePlaceholder");
             const submitButton = qrForm.querySelector('button[type="submit"]');
+            const downloadQRButton = document.getElementById("downloadQRButton"); // Get the download button
+
+            let currentQRObjectURL = null; // To store the blob URL for download
 
             function resetQRState() {
                 qrImage.style.display = 'none';
-                qrImage.src = ''; // Clear previous image
+                if (currentQRObjectURL) {
+                    URL.revokeObjectURL(currentQRObjectURL); // Revoke previous URL to free memory
+                    currentQRObjectURL = null;
+                }
+                qrImage.src = ''; 
                 qrMessage.style.display = 'block';
                 qrImagePlaceholder.classList.remove('loaded', 'error');
-                qrImagePlaceholder.style.borderColor = ''; // Resets to CSS default
+                qrImagePlaceholder.style.borderColor = ''; 
+                downloadQRButton.style.display = 'none'; // Hide download button on reset
             }
             
-            resetQRState(); // Initial setup
+            resetQRState(); 
             qrMessage.textContent = "Enter data and click \"Generate QR\" to see your code.";
 
+            downloadQRButton.addEventListener('click', function() {
+                if (currentQRObjectURL) {
+                    const a = document.createElement('a');
+                    a.href = currentQRObjectURL;
+                    a.download = "qr_code.png"; // Filename for the downloaded QR code
+                    document.body.appendChild(a); // Append to body to make it clickable (required for Firefox)
+                    a.click();
+                    document.body.removeChild(a); // Clean up by removing the temporary link
+                } else {
+                    // This case should ideally not happen if the button is only shown when URL is available
+                    alert("No QR code available to download. Please generate one first.");
+                }
+            });
 
             qrForm.addEventListener("submit", function(event) {
                 event.preventDefault();
-                resetQRState(); // Reset before new generation
+                resetQRState(); 
 
                 let formData = new FormData(this);
                 const qrDataInput = formData.get('qr_data');
@@ -60,9 +81,8 @@
                     return;
                 }
 
-                // Show loading state
                 qrMessage.textContent = "Generating QR Code...";
-                qrMessage.style.color = 'var(--secondary-color)'; // Reset to default message color
+                qrMessage.style.color = 'var(--secondary-color)';
                 
                 const originalButtonText = submitButton.textContent;
                 submitButton.textContent = 'Generating...';
@@ -74,7 +94,6 @@
                             return response.text().then(text => {
                                 let errorMsg = `HTTP error! Status: ${response.status}`;
                                 if (text) {
-                                    // If server returns a plain text error (like "No data provided")
                                     errorMsg = (text.length < 100) ? text : errorMsg;
                                 }
                                 throw new Error(errorMsg);
@@ -86,20 +105,21 @@
                         if (blob.type !== 'image/png') {
                             throw new Error("Invalid image format received.");
                         }
-                        const objectURL = URL.createObjectURL(blob);
-                        qrImage.src = objectURL;
+                        // Create an object URL for the blob
+                        currentQRObjectURL = URL.createObjectURL(blob); 
+                        
+                        qrImage.src = currentQRObjectURL;
                         qrImage.style.display = 'block';
                         qrMessage.style.display = 'none'; 
                         qrImagePlaceholder.classList.add('loaded');
-                        
-                        // Optional: Revoke object URL when image is no longer needed
-                        // qrImage.onload = () => { URL.revokeObjectURL(objectURL); } // Can cause issues if page is navigated away too fast
+                        downloadQRButton.style.display = 'inline-block'; // Show download button
                     })
                     .catch(error => {
                         console.error("Error generating QR code:", error);
                         qrMessage.textContent = `Error: ${error.message}`;
                         qrMessage.style.color = 'var(--error-color)';
                         qrImagePlaceholder.classList.add('error');
+                        downloadQRButton.style.display = 'none'; // Hide download button on error
                     })
                     .finally(() => {
                         submitButton.textContent = originalButtonText;
@@ -107,6 +127,5 @@
                     });
             });
         });
-    </script>
-</body>
+    </script></body>
 </html>
