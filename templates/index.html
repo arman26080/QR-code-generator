@@ -3,25 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator</title>
+    <title>QR Code Generator - Modern</title>
+    <!-- Google Fonts Link -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to the stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>QR Code Generator</h2>
-    <form action="/generate_qr" method="POST">
-        <input type="text" name="qr_data" placeholder="Enter text for QR code" required>
-        <button type="submit">Generate QR</button>
-    </form>
-    <h3>Generated QR Code:</h3>
-    <img id="qrImage" src="" alt="Your QR Code will appear here">
+    <div class="container">
+        <h2>QR Code Generator</h2>
+        <form id="qrForm">
+            <input type="text" name="qr_data" placeholder="Enter text or URL for QR code" required>
+            <button type="submit">Generate QR</button>
+        </form>
+        
+        <div class="qr-code-container">
+             <h3>Generated QR Code:</h3>
+             <div id="qrImagePlaceholder">
+                <img id="qrImage" src="" alt="Your QR Code will appear here">
+                <p id="qrMessage">Enter data and click "Generate QR" to see your code.</p>
+             </div>
+        </div>
+    </div>
+
     <script>
-        document.querySelector("form").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let formData = new FormData(this);
-            fetch("/generate_qr", { method: "POST", body: formData })
-                .then(response => response.blob())
-                .then(blob => {
-                    document.getElementById("qrImage").src = URL.createObjectURL(blob);
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrForm = document.getElementById("qrForm");
+            const qrImage = document.getElementById("qrImage");
+            const qrMessage = document.getElementById("qrMessage");
+            const qrImagePlaceholder = document.getElementById("qrImagePlaceholder");
+            const submitButton = qrForm.querySelector('button[type="submit"]');
+
+            function resetQRState() {
+                qrImage.style.display = 'none';
+                qrImage.src = ''; // Clear previous image
+                qrMessage.style.display = 'block';
+                qrImagePlaceholder.classList.remove('loaded', 'error');
+                qrImagePlaceholder.style.borderColor = ''; // Resets to CSS default
+            }
+            
+            resetQRState(); // Initial setup
+            qrMessage.textContent = "Enter data and click \"Generate QR\" to see your code.";
+
+
+            qrForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                resetQRState(); // Reset before new generation
+
+                let formData = new FormData(this);
+                const qrDataInput = formData.get('qr_data');
+
+                if (!qrDataInput || qrDataInput.trim() === "") {
+                    qrMessage.textContent = "Please enter some data for the QR code.";
+                    qrMessage.style.color = 'var(--error-color)';
+                    qrImagePlaceholder.classList.add('error');
+                    return;
+                }
+
+                // Show loading state
+                qrMessage.textContent = "Generating QR Code...";
+                qrMessage.style.color = 'var(--secondary-color)'; // Reset to default message color
+                
+                const originalButtonText = submitButton.textContent;
+                submitButton.textContent = 'Generating...';
+                submitButton.disabled = true;
+
+                fetch("/generate_qr", { method: "POST", body: formData })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                let errorMsg = `HTTP error! Status: ${response.status}`;
+                                if (text) {
+                                    // If server returns a plain text error (like "No data provided")
+                                    errorMsg = (text.length < 100) ? text : errorMsg;
+                                }
+                                throw new Error(errorMsg);
+                            });
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        if (blob.type !== 'image/png') {
+                            throw new Error("Invalid image format received.");
+                        }
+                        const objectURL = URL.createObjectURL(blob);
+                        qrImage.src = objectURL;
+                        qrImage.style.display = 'block';
+                        qrMessage.style.display = 'none'; 
+                        qrImagePlaceholder.classList.add('loaded');
+                        
+                        // Optional: Revoke object URL when image is no longer needed
+                        // qrImage.onload = () => { URL.revokeObjectURL(objectURL); } // Can cause issues if page is navigated away too fast
+                    })
+                    .catch(error => {
+                        console.error("Error generating QR code:", error);
+                        qrMessage.textContent = `Error: ${error.message}`;
+                        qrMessage.style.color = 'var(--error-color)';
+                        qrImagePlaceholder.classList.add('error');
+                    })
+                    .finally(() => {
+                        submitButton.textContent = originalButtonText;
+                        submitButton.disabled = false;
+                    });
+            });
         });
     </script>
 </body>
