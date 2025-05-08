@@ -2,21 +2,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-color: #007bff; /* Modern blue */
+    --primary-color: #007bff; 
     --primary-hover-color: #0056b3;
-    --secondary-color: #6c757d; /* Gray for secondary text */
-    --background-color: #f8f9fa; /* Light gray page background */
-    --container-background: #ffffff; /* White for the main card */
-    --text-color: #343a40; /* Dark gray for text */
-    --border-color: #dee2e6; /* Light border color */
+    --secondary-color: #6c757d; 
+    --background-color: #f8f9fa; 
+    --container-background: #ffffff; 
+    --text-color: #343a40; 
+    --border-color: #dee2e6; 
     --input-focus-border: #80bdff;
     --input-focus-shadow: rgba(0, 123, 255, 0.25);
-    --success-color: #28a745; /* Green for success states */
-    --error-color: #dc3545;   /* Red for error states */
+    --success-color: #28a745; 
+    --success-hover-color: #1e7e34; /* Darker green for download button hover */
+    --error-color: #dc3545;   
     --font-family: 'Poppins', sans-serif;
-    --border-radius-sm: 0.25rem; /* 4px */
-    --border-radius-md: 0.5rem;  /* 8px */
-    --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    --border-radius-sm: 0.25rem; 
+    --border-radius-md: 0.5rem;  
+    --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); 
 }
 
 * {
@@ -32,14 +33,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center content vertically */
+    justify-content: center; 
     min-height: 100vh;
     padding: 20px;
 }
 
 .container {
     background-color: var(--container-background);
-    padding: 35px 45px; /* Increased padding */
+    padding: 35px 45px; 
     border-radius: var(--border-radius-md);
     box-shadow: var(--box-shadow);
     width: 100%;
@@ -48,20 +49,20 @@ body {
 }
 
 h2 {
-    color: var(--text-color); /* Changed from primary-color for better contrast with form */
-    margin-bottom: 30px; /* Increased margin */
+    color: var(--text-color); 
+    margin-bottom: 30px; 
     font-weight: 600;
-    font-size: 2.2rem; /* Slightly larger */
+    font-size: 2.2rem; 
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Increased space between input and button */
+    gap: 20px; 
 }
 
 input[type="text"] {
-    padding: 15px; /* Increased padding */
+    padding: 15px; 
     font-size: 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
@@ -81,17 +82,17 @@ input[type="text"]::placeholder {
 }
 
 button[type="submit"] {
-    background-image: linear-gradient(to right, var(--primary-color), #005cbf); /* Gradient background */
+    background-image: linear-gradient(to right, var(--primary-color), #005cbf); 
     color: white;
-    padding: 15px; /* Increased padding */
-    font-size: 1.05rem; /* Slightly larger */
+    padding: 15px; 
+    font-size: 1.05rem; 
     font-weight: 500;
     border: none;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: background-image 0.3s ease, transform 0.1s ease;
     text-transform: uppercase;
-    letter-spacing: 0.8px; /* Added letter spacing */
+    letter-spacing: 0.8px; 
 }
 
 button[type="submit"]:hover {
@@ -111,22 +112,23 @@ button[type="submit"]:disabled {
 
 
 .qr-code-container {
-    margin-top: 35px; /* Increased margin */
+    margin-top: 35px; 
+    /* text-align: center; already handled by .container */
 }
 
 .qr-code-container h3 {
-    font-size: 1.3rem; /* Slightly larger */
+    font-size: 1.3rem; 
     color: var(--text-color);
-    margin-bottom: 20px; /* Increased margin */
+    margin-bottom: 20px; 
     font-weight: 500;
 }
 
 #qrImagePlaceholder {
-    background-color: #fdfdfd; /* Slightly off-white */
+    background-color: #fdfdfd; 
     border: 2px dashed var(--border-color);
-    border-radius: var(--border-radius-md); /* More rounded */
+    border-radius: var(--border-radius-md); 
     padding: 20px;
-    min-height: 240px; /* Adjusted for image + padding */
+    min-height: 240px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -156,14 +158,40 @@ button[type="submit"]:disabled {
 #qrMessage {
     font-size: 0.95rem;
     color: var(--secondary-color);
-    margin-top: 15px; /* Increased margin */
-    min-height: 1.2em; /* Reserve space to prevent layout shift */
+    margin-top: 15px; 
+    min-height: 1.2em; 
 }
+
+/* Download Button Styles */
+.download-button {
+    background-color: var(--success-color); /* Green for download */
+    color: white;
+    padding: 12px 24px; /* Adjust padding as needed */
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 20px; /* Space from the QR image placeholder */
+    /* display: none; is set inline initially */
+}
+
+.download-button:hover {
+    background-color: var(--success-hover-color); /* Darker green on hover */
+}
+
+.download-button:active {
+    transform: scale(0.98);
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .container {
-        padding: 25px 20px; /* Adjusted padding for smaller screens */
+        padding: 25px 20px; 
         margin-left: 10px;
         margin-right: 10px;
     }
@@ -182,4 +210,9 @@ button[type="submit"]:disabled {
     #qrImagePlaceholder {
         min-height: 200px;
     }
-      }
+
+    .download-button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
